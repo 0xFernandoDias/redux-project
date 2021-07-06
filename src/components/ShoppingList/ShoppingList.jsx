@@ -1,8 +1,15 @@
 import React from 'react'
-import { Wrapper, Title, Array } from './ShoppingList.styles'
+import { useSelector } from 'react-redux'
 import Checkbox from '../../shared/Checkbox'
+import { selectAllProducts, selectSelectedProducts } from '../../store/Products/Products.selectors'
+import { Wrapper, Title, Array } from './ShoppingList.styles'
 
-function ShoppingList({ title, products, onToggle }) {
+function ShoppingList({ title, onToggle, displayOnlySelected }) {
+  const products = useSelector(
+    displayOnlySelected
+    ? selectSelectedProducts 
+    : selectAllProducts)
+
   return (
     <Wrapper>
       <Title>
@@ -12,7 +19,7 @@ function ShoppingList({ title, products, onToggle }) {
         {
           products.map(product =>
             <Checkbox
-              key={product.name}
+              key={product.id}
               value={product.checked}
               title={product.name}
               onClick={() => onToggle(product.id, product.checked, product.name)}

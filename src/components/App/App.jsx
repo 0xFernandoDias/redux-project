@@ -1,41 +1,33 @@
 import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+
 import LineChart from '../../shared/LineChart'
-import AppContainer from '../AppContainer/AppContainer'
+
+import AppContainer from '../AppContainer'
 import AppHeader from '../AppHeader'
 import ShoppingList from '../ShoppingList'
-import { Wrapper, Container } from './App.styles'
-import productsMock from '../../mocks/products.json'
+
+import { selectSelectedProductTotalPrice, selectAllProducts, selectSelectedProducts } from '../../store/Products/Products.selectors'
+
+import { addProductToCart } from '../../store/Products/Products.actions'
+
 import extractPercentage from '../../utils/extractPercentage'
 
+import { Wrapper, Container } from './App.styles'
+
 function App() {
+  const dispatch = useDispatch()
+
   const colors = ['#62CBC6', '#00ABAD', '#00858C', '#006073', '#004D61']
 
-  const [products, setProducts] = useState(productsMock.products)
-  const [selectedProducts, setSelectedProducts] = useState([])
-  const [totalPrice, setTotalPrice] = useState(0)
+  const products = useSelector(selectAllProducts)
+  const selectedProducts = useSelector(selectSelectedProducts)
+  const totalPrice = useSelector(selectSelectedProductTotalPrice)
 
-  useEffect(() => {
-    const newSelectedProducts = products
-      .filter(product => product.checked)
+  console.log(totalPrice)
 
-    setSelectedProducts(newSelectedProducts)
-  }, [products])
-
-  useEffect(() => {
-    const total = selectedProducts
-      .map(product => product.price)
-      .reduce((a, b) => a + b, 0)
-
-    setTotalPrice(total)
-  }, [selectedProducts])
-
-  function handleToggle(id, checked, name) {
-    const newProducts = products.map(product =>
-      product.id === id
-        ? { ...product, checked: !product.checked }
-        : product
-    )
-    setProducts(newProducts)
+  function handleToggle(id) {
+    dispatch(addProductToCart(id))
   }
 
   return (
@@ -46,14 +38,13 @@ function App() {
           left={
             <ShoppingList
               title="Available products"
-              products={products}
               onToggle={handleToggle}
-            />}
-          middle={
-            <ShoppingList
-              title="Your shopping list"
-              products={selectedProducts}
-              onToggle={handleToggle}
+              />}
+              middle={
+                <ShoppingList
+                title="Your shopping list"
+                onToggle={handleToggle}
+                displayOnlySelected
             />}
           right={<div>
             Statistics
@@ -104,11 +95,11 @@ function App() {
                 Expenditure forecast:
               </h2>
               <div style={{ fontSize: 24 }}>
-                {totalPrice.toLocaleString('pt-br', {
+                { totalPrice.toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   style: 'currency',
-                  currency: 'BRL'
-                })}
+                  currency: 'USD'
+                }) }
               </div>
             </div>
           </div>}
